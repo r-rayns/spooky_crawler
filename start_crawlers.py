@@ -68,7 +68,7 @@ def _crawl(result, spider, parser, logger, date_threshold=None):
     # once finished take the date, this will be used to check against last mod date
     crawl_start_date = datetime.utcnow()
     date_threshold = pytz.utc.localize(crawl_start_date)
-    deferred.addCallback(sleep, seconds=10)
+    deferred.addCallback(sleep, seconds=86400)
     deferred.addCallback(_crawl, spider, parser, date_threshold, logger)
     return deferred
 
