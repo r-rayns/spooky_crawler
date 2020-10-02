@@ -1,0 +1,4 @@
+database.ini
+crawls
+__pycache__/
+.vscode
