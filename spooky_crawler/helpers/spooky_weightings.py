@@ -1,6 +1,7 @@
 from spooky_crawler.middleware.article_classifier import Weighting
 from spooky_crawler.helpers.spooky_classifications import ArticleClass
 
+# keywords must be lowercase!
 _common_weights = {
     'paranormal': 1, 
     'film': -2, 
@@ -14,7 +15,7 @@ _common_weights = {
     'performance': -1, 
     'things': -10,
     'halloween': -10,
-    'Hallowe\'en': -10,
+    'hallowe\'en': -10,
     'hoax': -100,
     'list': -100,
     'abuse': -100,
