@@ -1,4 +1,5 @@
 database.ini
-crawls
+crawls/*
+!crawls/.gitkeep
 __pycache__/
 .vscode

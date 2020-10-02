@@ -8,14 +8,17 @@ from spooky_crawler.middleware.article_parser import ArticleParser
 from twisted.internet import reactor
 from twisted.internet.task import deferLater
 import logging
+from pathlib import Path
 
 
-def create_logger(name, log_path):
+def create_logger(name, log_path, log_name):
+    Path(log_path).mkdir(parents=True, exist_ok=True)
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter(
         '%(asctime)s:%(levelname)s:%(name)s:%(funcName)s:%(message)s')
-    file_handler = logging.FileHandler(log_path)
+    file_handler = logging.FileHandler(log_path + '/' + log_name)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     return logger
@@ -26,7 +29,7 @@ class SpookyLiverpool(SpookySpider):
     job_dir = 'crawls/liverpool'
     custom_settings = {'JOBDIR': job_dir}
     sitemap_urls = ['https://www.liverpoolecho.co.uk/robots.txt']
-    logger = create_logger('spider.liverpool', job_dir + '/liverpool.log')
+    logger = create_logger('spider.liverpool', job_dir, 'liverpool.log')
 
 
 class SpookyManchester(SpookySpider):
@@ -34,7 +37,7 @@ class SpookyManchester(SpookySpider):
     job_dir = 'crawls/manchester'
     custom_settings = {'JOBDIR': job_dir}
     sitemap_urls = ['https://www.manchestereveningnews.co.uk/robots.txt']
-    logger = create_logger('spider.manchester', job_dir + '/manchester.log')
+    logger = create_logger('spider.manchester', job_dir, 'manchester.log')
 
 
 class SpookyYorkshire(SpookySpider):
@@ -42,7 +45,7 @@ class SpookyYorkshire(SpookySpider):
     job_dir = 'crawls/yorkshire'
     custom_settings = {'JOBDIR': job_dir}
     sitemap_urls = ['https://www.yorkshireeveningpost.co.uk/robots.txt']
-    logger = create_logger('spider.yorkshire', job_dir + '/yorkshire.log')
+    logger = create_logger('spider.yorkshire', job_dir, 'yorkshire.log')
 
 
 class SpookyPlymouth(SpookySpider):
@@ -50,7 +53,7 @@ class SpookyPlymouth(SpookySpider):
     job_dir = 'crawls/plymouth'
     custom_settings = {'JOBDIR': job_dir}
     sitemap_urls = ['https://www.plymouthherald.co.uk/robots.txt']
-    logger = create_logger('spider.plymouth', job_dir + '/plymouth.log')
+    logger = create_logger('spider.plymouth', job_dir, 'plymouth.log')
 
 
 process = CrawlerProcess(get_project_settings())
