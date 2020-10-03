@@ -75,19 +75,24 @@ class ArticleParser():
         cursor = conn.cursor()
         # only select specific columns so we know the position they are returned in the array
         cursor.execute("""
-            SELECT publisher_id, name FROM public.publishers 
-            WHERE name = '%s'
-        """ % extracted_data['publisher'])
+             SELECT publisher_id, name FROM public.publishers
+             WHERE name = '%s'
+         """ % extracted_data['publisher'])
 
         publishers = cursor.fetchone()
 
         if not publishers:
-            cursor.execute("""
-                INSERT INTO publishers (name, label, lat_lng) VALUES ('%s', '%s' '0, 0')
-                RETURNING publisher_id
-            """ % extracted_data['publisher'], self.publisher_label)
-            conn.commit()
-            publishers = cursor.fetchone()
+            self.logger.info('Publisher not found, adding publisher...')
+            try:
+                cursor.execute("""
+                 INSERT INTO publishers (name, label, lat_lng) VALUES ('%s', '%s' '0, 0')
+                 RETURNING publisher_id
+             """ % (extracted_data['publisher'], self.publisher_label))
+                conn.commit()
+                publishers = cursor.fetchone()
+            except Exception as err:
+                self.logger.warning(
+                    'Could not add new publisher, error: {}'.format(err))
 
         cursor.close()
         return publishers[0]
@@ -110,8 +115,12 @@ class ArticleParser():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
-        cursor.execute(sql_insert, (article['publisher_id'], article['publisher'], article['date_published'],
+        try:
+            cursor.execute(sql_insert, (article['publisher_id'], article['publisher'], article['date_published'],
                                     article['date_retrieved'], article['title'], article['description'],
                                     article['link'], article['article_type'], False))
-        conn.commit()
-        cursor.close()
+            conn.commit()
+            cursor.close()
+            self.logger.info('Stored article!')
+        except Exception as err:
+            self.logger.warning('Could not store article! Error: {}'.format(err))
