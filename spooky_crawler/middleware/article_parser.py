@@ -85,7 +85,7 @@ class ArticleParser():
             self.logger.info('Publisher not found, adding publisher...')
             try:
                 cursor.execute("""
-                 INSERT INTO publishers (name, label, lat_lng) VALUES ('%s', '%s' '0, 0')
+                 INSERT INTO publishers (name, label, lat_lng) VALUES ('%s', '%s', '0, 0')
                  RETURNING publisher_id
              """ % (extracted_data['publisher'], self.publisher_label))
                 conn.commit()
