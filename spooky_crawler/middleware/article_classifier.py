@@ -42,10 +42,13 @@ class ArticleClassifier():
 
         matches = re.findall(regex_value, article, re.IGNORECASE)
 
+        self.logger.info('matches made: ', matches)
+
         for match in matches:
             score += weights[match.lower()]
 
         return score
+
 
 class Weighting():
     def __init__(self, weights, classification):
