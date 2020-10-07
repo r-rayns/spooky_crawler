@@ -17,6 +17,7 @@ class ArticleClassifier():
         scores = []
 
         for weighting in self.weightings:
+            self.logger.info('Getting score using {} weightings'.format(weighting.classification))
             scores.append((weighting.classification, self._score_article(
                 article, weighting.weights)))
 
@@ -42,7 +43,7 @@ class ArticleClassifier():
 
         matches = re.findall(regex_value, article, re.IGNORECASE)
 
-        self.logger.info('matches made: ', matches)
+        self.logger.info('Matches made: {}'.format(matches))
 
         for match in matches:
             score += weights[match.lower()]
