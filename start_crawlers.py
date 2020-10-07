@@ -64,7 +64,7 @@ def sleep(self, *args, seconds):
     return deferLater(reactor, seconds, lambda: None)
 
 
-def _crawl(result, spider, parser, logger, date_threshold=None):
+def _crawl(spider, parser, logger, date_threshold=None):
     logger.info('🕷 Begin crawl for: {}, using date_threshold: {}'.format(
         spider.name, date_threshold))
     deferred = process.crawl(spider, parser, date_threshold, logger)
@@ -72,16 +72,16 @@ def _crawl(result, spider, parser, logger, date_threshold=None):
     crawl_start_date = datetime.utcnow()
     date_threshold = pytz.utc.localize(crawl_start_date)
     deferred.addCallback(sleep, seconds=86400)
-    deferred.addCallback(_crawl, spider, parser, date_threshold, logger)
+    deferred.addCallback(_crawl, spider, parser, logger, date_threshold,)
     return deferred
 
 
-_crawl(None, SpookyLiverpool, ArticleParser(
+_crawl(SpookyLiverpool, ArticleParser(
     'Liverpool Echo', SpookyLiverpool.logger).parse_article, SpookyLiverpool.logger)
-_crawl(None, SpookyManchester, ArticleParser(
+_crawl(SpookyManchester, ArticleParser(
     'Manchester Evening News', SpookyManchester.logger).parse_article, SpookyManchester.logger)
-_crawl(None, SpookyYorkshire, ArticleParser(
+_crawl(SpookyYorkshire, ArticleParser(
     'Yorkshire Evening Post', SpookyYorkshire.logger).parse_article, SpookyYorkshire.logger)
-_crawl(None, SpookyPlymouth, ArticleParser(
+_crawl(SpookyPlymouth, ArticleParser(
     'Plymouth Herald', SpookyPlymouth.logger).parse_article, SpookyPlymouth.logger)
 process.start()
