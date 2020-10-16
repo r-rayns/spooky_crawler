@@ -8,6 +8,7 @@ from spooky_crawler.middleware.article_parser import ArticleParser
 from twisted.internet import reactor
 from twisted.internet.task import deferLater
 import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 
@@ -18,10 +19,22 @@ def create_logger(name, log_path, log_name):
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter(
         '%(asctime)s:%(levelname)s:%(name)s:%(funcName)s:%(message)s')
-    file_handler = logging.FileHandler(log_path + '/' + log_name)
+    file_path = log_path + '/' + log_name
+    # max logger size 500MB, mode a = appending
+    file_handler = RotatingFileHandler(file_path, mode='a',
+                                       maxBytes=500*1024*1024, backupCount=1, encoding=None, delay=0)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     return logger
+
+
+# For testing purposes
+# class Rrayn(SpookySpider):
+    # name = "rrayn"
+    # job_dir = 'crawls/rrayn'
+    # custom_settings = {'JOBDIR': job_dir}
+    # sitemap_urls = ['https://www.rrayns.co.uk/robots.txt']
+    # logger = create_logger('spider.rrayn', job_dir, 'rrayn.log')
 
 
 class SpookyLiverpool(SpookySpider):
@@ -59,29 +72,33 @@ class SpookyPlymouth(SpookySpider):
 process = CrawlerProcess(get_project_settings())
 
 
-def sleep(self, *args, seconds):
+def sleep(self, *args, seconds, logger):
     """Non blocking sleep callback"""
+    logger.info('Sleeping...')
     return deferLater(reactor, seconds, lambda: None)
 
 
-def _crawl(spider, parser, logger, date_threshold=None):
+def _crawl(result, spider, parser, logger, date_threshold=None):
     logger.info('🕷 Begin crawl for: {}, using date_threshold: {}'.format(
         spider.name, date_threshold))
     deferred = process.crawl(spider, parser, date_threshold, logger)
     # once finished take the date, this will be used to check against last mod date
     crawl_start_date = datetime.utcnow()
     date_threshold = pytz.utc.localize(crawl_start_date)
-    deferred.addCallback(sleep, seconds=86400)
-    deferred.addCallback(_crawl, spider, parser, logger, date_threshold,)
+    deferred.addCallback(sleep, seconds=86400, logger=logger)
+    deferred.addCallback(_crawl, spider, parser, logger, date_threshold)
     return deferred
 
 
-_crawl(SpookyLiverpool, ArticleParser(
+# _crawl(None, Rrayn, ArticleParser(
+#     'Rrayn', Rrayn.logger).parse_article, Rrayn.logger)
+
+_crawl(None, SpookyLiverpool, ArticleParser(
     'Liverpool Echo', SpookyLiverpool.logger).parse_article, SpookyLiverpool.logger)
-_crawl(SpookyManchester, ArticleParser(
+_crawl(None, SpookyManchester, ArticleParser(
     'Manchester Evening News', SpookyManchester.logger).parse_article, SpookyManchester.logger)
-_crawl(SpookyYorkshire, ArticleParser(
+_crawl(None, SpookyYorkshire, ArticleParser(
     'Yorkshire Evening Post', SpookyYorkshire.logger).parse_article, SpookyYorkshire.logger)
-_crawl(SpookyPlymouth, ArticleParser(
+_crawl(None, SpookyPlymouth, ArticleParser(
     'Plymouth Herald', SpookyPlymouth.logger).parse_article, SpookyPlymouth.logger)
 process.start()
