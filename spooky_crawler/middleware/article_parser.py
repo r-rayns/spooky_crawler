@@ -1,11 +1,12 @@
+import os
 import dateparser
 import spooky_crawler.helpers.dom_selectors as dom
 import spooky_crawler.helpers.spooky_weightings as weightings
+import requests
 from datetime import datetime
-from spooky_crawler.utils import Database
 from spooky_crawler.middleware.article_classifier import ArticleClassifier
 from spooky_crawler.middleware.extractor import Extractor
-
+from dotenv import load_dotenv
 
 class ArticleParser():
 
@@ -40,20 +41,17 @@ class ArticleParser():
 
         doc_date = self.extractor.extract(
             doc, dom.date_selectors, 'datePublished')
-        pub_date = dateparser.parse(doc_date).isoformat()
+        pub_date = dateparser.parse(doc_date).timestamp()
 
         extractedData = {
-            'publisher_id': None,
-            'publisher': self.format_publisher_name(self.extractor.extract(doc, dom.publisher_selectors, 'publisher', 'name')),
-            'date_published': pub_date,
-            'date_retrieved': datetime.utcnow().isoformat(),
+            'publisherName': self.format_publisher_name(self.extractor.extract(doc, dom.publisher_selectors, 'publisher', 'name')),
+            'datePublished': int(pub_date),
+            'dateRetrieved': int(datetime.utcnow().timestamp()),
             'title': self.extractor.extract(doc, dom.title_selectors, 'headline'),
             'description': self.extractor.extract(doc, dom.description_selectors, 'description'),
             'link': doc.url,
-            'article_type': classification
+            'subject': classification
         }
-
-        extractedData['publisher_id'] = self.get_publisher_id(extractedData)
 
         for value in extractedData:
             if not value:
@@ -68,59 +66,15 @@ class ArticleParser():
             return None
         return publisher_name.replace(" ", "").lower()
 
-    def get_publisher_id(self, extracted_data):
-        if not extracted_data['publisher']:
-            return None
-        conn = Database(self.logger).connect()
-        cursor = conn.cursor()
-        # only select specific columns so we know the position they are returned in the array
-        cursor.execute("""
-             SELECT publisher_id, name FROM public.publishers
-             WHERE name = '%s'
-         """ % extracted_data['publisher'])
-
-        publishers = cursor.fetchone()
-
-        if not publishers:
-            self.logger.info('Publisher not found, adding publisher...')
-            try:
-                cursor.execute("""
-                 INSERT INTO publishers (name, label, lat_lng) VALUES ('%s', '%s', '0, 0')
-                 RETURNING publisher_id
-             """ % (extracted_data['publisher'], self.publisher_label))
-                conn.commit()
-                publishers = cursor.fetchone()
-            except Exception as err:
-                self.logger.warning(
-                    'Could not add new publisher, error: {}'.format(err))
-
-        cursor.close()
-        return publishers[0]
-
     def store_article(self, article):
-        conn = Database(self.logger).connect()
-        cursor = conn.cursor()
-        sql_insert = """
-            INSERT INTO articles (
-                publisher_id, 
-                publisher, 
-                date_published, 
-                date_retrieved,
-                title,
-                description,
-                link,
-                article_type,
-                accepted
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
+        headers = {
+            'Authorization': 'Bearer {}'.format(os.getenv('API_TOKEN'))}
+        req = requests.post(
+            '{}/api/articles/store'.format(os.getenv('HOST')), data=article, headers=headers)
 
-        try:
-            cursor.execute(sql_insert, (article['publisher_id'], article['publisher'], article['date_published'],
-                                    article['date_retrieved'], article['title'], article['description'],
-                                    article['link'], article['article_type'], False))
-            conn.commit()
-            cursor.close()
+        if(req.status_code == 200):
             self.logger.info('Stored article!')
-        except Exception as err:
-            self.logger.warning('Could not store article! Error: {}'.format(err))
+        else:
+            self.logger.warning(
+                'Could not store article! \u001b[31mError: {}\u001b[0m'.format(req.json()))
+            self.logger.info('Failed request: {}'.format(article))
