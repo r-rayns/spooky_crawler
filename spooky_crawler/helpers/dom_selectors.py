@@ -1,4 +1,4 @@
-
+# To test new publications the selectors can be copied into the dev toolsearch bar
 title_selectors = (
     lambda doc: doc.xpath('//meta[contains(@name, "title")]/@content').get(),
     lambda doc: doc.css('title::text').get(),

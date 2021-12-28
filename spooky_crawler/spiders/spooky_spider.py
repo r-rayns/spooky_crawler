@@ -1,14 +1,10 @@
 import shutil
 import os
 import scrapy
-import types
 import dateparser
-import pytz
-import psycopg2
 import spooky_crawler.helpers.dom_selectors as dom
 import spooky_crawler.helpers.spooky_weightings as weightings
 from datetime import datetime
-from spooky_crawler.utils import Database
 from spooky_crawler.middleware.article_classifier import ArticleClassifier
 from spooky_crawler.middleware.extractor import Extractor
 
@@ -26,7 +22,7 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
         self.logger = logger
         self.job_dir = self.custom_settings.get('JOBDIR')
         self.logger.info('Initalised spider, job_dir: {}'.format(self.job_dir))
-        
+
         if date_threshold:
             date_store_write = open(self.job_dir + '/date_store.txt', 'w')
             date_store_write.write(date_threshold.isoformat())
@@ -35,8 +31,10 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
         else:
             try:
                 date_store_read = open(self.job_dir + '/date_store.txt', 'r')
-                self.date_threshold = dateparser.parse(date_store_read.readline())
-                self.logger.info('Date threshold loaded: {}'.format(self.date_threshold))
+                self.date_threshold = dateparser.parse(
+                    date_store_read.readline())
+                self.logger.info(
+                    'Date threshold loaded: {}'.format(self.date_threshold))
                 date_store_read.close()
             except:
                 self.date_threshold = None
@@ -54,7 +52,8 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
 
     @classmethod
     def from_crawler(cls, crawler, parser, date_threshold, logger, *args, **kwargs):
-        spider = cls(parser=parser, date_threshold=date_threshold, logger=logger, **kwargs)
+        spider = cls(parser=parser, date_threshold=date_threshold,
+                     logger=logger, **kwargs)
         spider._set_crawler(crawler)
         return spider
 
@@ -69,4 +68,5 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
             os.remove(self.job_dir + '/requests.seen')
             shutil.rmtree(self.job_dir + '/requests.queue')
         except Exception as err:
-            self.logger.warning('Could not delete existing requests in job_dir, err: {}'.format(err))
+            self.logger.warning(
+                'Could not delete existing requests in job_dir, err: {}'.format(err))
