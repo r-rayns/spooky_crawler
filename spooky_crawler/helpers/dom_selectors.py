@@ -1,7 +1,8 @@
-# To test new publications the selectors can be copied into the dev toolsearch bar
+# To test new publications the selectors can be tested in the dev console using $x('<selector>')
 title_selectors = (
     lambda doc: doc.xpath('//meta[contains(@name, "title")]/@content').get(),
     lambda doc: doc.css('title::text').get(),
+    lambda doc: doc.xpath('//meta[contains(@property, "og:title")]/@content').get(),
 )
 
 description_selectors = (
