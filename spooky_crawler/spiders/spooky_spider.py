@@ -16,6 +16,8 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
     logger = None
 
     sitemap_follow = ['/sitemaps/']
+    # note, things like /whats-on/ will be ignored, sometimes stories are posted here see (https://www.plymouthherald.co.uk/whats-on/whats-on-news/ufos-filmed-flying-over-plymouth-6533732)
+    # keep an eye on this
     sitemap_rules = [('/news/', 'parser')]
 
     def __init__(self, parser, date_threshold, logger, **kwargs):
