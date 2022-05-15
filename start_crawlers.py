@@ -78,6 +78,13 @@ class SpookyLincolnshire(SpookySpider):
     sitemap_urls = ['https://www.lincolnshirelive.co.uk/robots.txt']
     logger = create_logger('spider.lincolnshire', job_dir, 'lincolnshire.log')
 
+class SpookyHampshire(SpookySpider):
+    name = "spooky_hampshire"
+    job_dir = 'crawls/hampshire'
+    custom_settings = {'JOBDIR': job_dir}
+    sitemap_urls = ['https://www.hampshirelive.news/robots.txt']
+    logger = create_logger('spider.hampshire', job_dir, 'hampshire.log')
+
 process = CrawlerProcess(get_project_settings())
 
 
@@ -97,7 +104,7 @@ def _crawl(result, spider, parser, logger, date_threshold=None):
     # take current date, this will be used to check against last mod date on the next crawl
     crawl_start_date = datetime.utcnow()
     date_threshold = pytz.utc.localize(crawl_start_date)
-    deferred.addCallback(sleep, seconds=15778800, logger=logger) # 15778800s = 6 months
+    deferred.addCallback(sleep, seconds=86400, logger=logger) # 86400s = 24 hours
     deferred.addCallback(_crawl, spider, parser, logger, date_threshold)
     return deferred
 
@@ -115,4 +122,6 @@ _crawl(None, SpookyPlymouth, ArticleParser(
     'Plymouth Herald', SpookyPlymouth.logger).parse_article, SpookyPlymouth.logger)
 _crawl(None, SpookyLincolnshire, ArticleParser(
     'Lincolnshire Live', SpookyLincolnshire.logger).parse_article, SpookyLincolnshire.logger)
+_crawl(None, SpookyHampshire, ArticleParser(
+    'Hampshire Live', SpookyHampshire.logger).parse_article, SpookyHampshire.logger)
 process.start()

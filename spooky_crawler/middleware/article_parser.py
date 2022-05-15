@@ -31,7 +31,7 @@ class ArticleParser():
 
         article_body = self.extractor.extract(
             doc, dom.article_body_selectors, 'articleBody')
-        classification = self.classifier.classify_article(article_body)
+        classification, matched_terms = self.classifier.classify_article(article_body)
 
         if not classification:
             self.logger.info('Article could not be classified')
@@ -50,7 +50,8 @@ class ArticleParser():
             'title': self.extractor.extract(doc, dom.title_selectors, 'headline'),
             'description': self.extractor.extract(doc, dom.description_selectors, 'description'),
             'link': doc.url,
-            'subject': classification
+            'subject': classification,
+            'matchedTerms': matched_terms
         }
 
         for value in extractedData:

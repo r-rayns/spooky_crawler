@@ -61,7 +61,6 @@ ghost_weighting = Weighting({
     'manifestation': 1,
     'ghosts': 1,
     'ghost': 1,
-    'spirit': 1,
     'old haunt': 0,
     'haunt': 1,
     **_common_weights},
