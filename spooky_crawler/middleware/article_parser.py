@@ -71,7 +71,7 @@ class ArticleParser():
         headers = {
             'Authorization': 'Bearer {}'.format(os.getenv('API_TOKEN'))}
         req = requests.post(
-            '{}/api/articles/store'.format(os.getenv('HOST')), data=article, headers=headers)
+            '{}/api/articles'.format(os.getenv('HOST')), data=article, headers=headers)
 
         if(req.status_code == 200):
             self.logger.info('Stored article!')
