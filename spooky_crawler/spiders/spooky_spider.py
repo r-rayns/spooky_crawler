@@ -1,3 +1,4 @@
+from logging import Logger
 import shutil
 import os
 import scrapy
@@ -7,23 +8,29 @@ import spooky_crawler.helpers.spooky_weightings as weightings
 from datetime import datetime
 from spooky_crawler.middleware.article_classifier import ArticleClassifier
 from spooky_crawler.middleware.extractor import Extractor
+from spooky_crawler.middleware.article_parser import ArticleParser
+from scrapy.spiders import SitemapSpider
+from scrapy.signals import spider_idle
+from typing import Optional, Any, Dict
 
 
-class SpookySpider(scrapy.spiders.SitemapSpider):
-    parser = None
-    date_threshold = None
-    job_dir = None
-    logger = None
+class SpookySpider(SitemapSpider):
+    article_parser: ArticleParser
+    date_threshold: Optional[datetime]
+    job_dir: str
+    logger:Logger
+    custom_settings: dict
 
     sitemap_follow = ['/sitemaps/']
-    # note, things like /whats-on/ will be ignored, sometimes stories are posted here see (https://www.plymouthherald.co.uk/whats-on/whats-on-news/ufos-filmed-flying-over-plymouth-6533732)
-    # keep an eye on this
-    sitemap_rules = [('/news/', 'parser')]
+    # match /news/ urls in sitemap and parse using the article_parser function
+    sitemap_rules = [('/news/', 'article_parser')]
 
-    def __init__(self, parser, date_threshold, logger, **kwargs):
+    def __init__(self, article_parser, date_threshold, logger, **kwargs):
+        self.article_parser = article_parser
+        super().__init__(**kwargs)
         self.logger = logger
-        self.job_dir = self.custom_settings.get('JOBDIR')
-        self.logger.info('Initalised spider, job_dir: {}'.format(self.job_dir))
+        self.job_dir = str(self.custom_settings.get('JOBDIR'))
+        self.logger.info('Initialised spider, job_dir: {}'.format(self.job_dir))
 
         if date_threshold:
             date_store_write = open(self.job_dir + '/date_store.txt', 'w')
@@ -41,9 +48,6 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
             except:
                 self.date_threshold = None
 
-        self.parser = parser
-        super().__init__(**kwargs)
-
     def sitemap_filter(self, entries):
         for entry in entries:
             date_time = None
@@ -52,17 +56,10 @@ class SpookySpider(scrapy.spiders.SitemapSpider):
             if not self.date_threshold or not date_time or (date_time >= self.date_threshold):
                 yield entry
 
-    @classmethod
-    def from_crawler(cls, crawler, parser, date_threshold, logger, *args, **kwargs):
-        spider = cls(parser=parser, date_threshold=date_threshold,
-                     logger=logger, **kwargs)
-        spider._set_crawler(crawler)
-        return spider
-
     def _set_crawler(self, crawler):
         self.crawler = crawler
         crawler.signals.connect(
-            self.spider_idle, signal=scrapy.signals.spider_idle)
+            self.spider_idle, signal=spider_idle)
 
     def spider_idle(self):
         self.logger.info('Prevent spider closure')

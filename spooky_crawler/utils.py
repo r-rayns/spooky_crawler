@@ -3,21 +3,33 @@ class Dictionary():
         self.value = value
         self.error = None
 
-    # safely retrieve value from dictonary else set value to None
+    # safely retrieve value from dictionary else set value to None
     def safeGet(self, *keys):
-        for index, key in enumerate(keys):
-            try:
-                self.value = self.value[key]
-            except KeyError:
-                if(index == len(keys) - 1):
-                    # no key worked, error
-                    self.error = KeyError
-                    self.value = None
-                    return self
+      error_occurred = False
+      for index, key in enumerate(keys):
+        if self.value is None:
+          # value is none we won't be able to access any properties on it, error
+          error_occurred = True
+          break
+
+        try:
+          self.value = self.value[key]
+        except KeyError:
+          if(index == len(keys) - 1):
+            # no key worked, error
+            error_occurred = True
+            break
+
+      if error_occurred:
+        self.error = KeyError
+        self.value = None
         return self
 
+      return self
+
+
     # sets value to the result of a function if
-    # original value could not be retrieved from the dictonary
+    # original value could not be retrieved from the dictionary
     def onError(self, fn):
         if self.error:
             self.value = fn()

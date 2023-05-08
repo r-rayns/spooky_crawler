@@ -26,7 +26,7 @@ class Extractor():
             if json_value:
                 return  json_value
 
-    # recursivly run selector functions against the document until a value is found
+    # recursively run selector functions against the document until a value is found
     # or we run out of selectors
     def _try_selectors(self, document, selectors):
         value = selectors[0](document)

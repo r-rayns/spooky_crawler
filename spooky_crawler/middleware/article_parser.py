@@ -6,15 +6,16 @@ import requests
 from datetime import datetime
 from spooky_crawler.middleware.article_classifier import ArticleClassifier
 from spooky_crawler.middleware.extractor import Extractor
-from dotenv import load_dotenv
+from logging import Logger
+import traceback
 
 class ArticleParser():
 
     extractor = Extractor()
 
-    classifier = None
+    classifier: ArticleClassifier
     publisher_label = ''
-    logger = None
+    logger: Logger
 
     def __init__(self, publisher_label, logger):
         self.publisher_label = publisher_label
@@ -41,7 +42,13 @@ class ArticleParser():
 
         doc_date = self.extractor.extract(
             doc, dom.date_selectors, 'datePublished')
-        pub_date = dateparser.parse(doc_date).timestamp()
+
+        parsed_date = dateparser.parse(doc_date)
+        if not isinstance(parsed_date, datetime):
+          self.logger.error('Parsed article publication date is not a valid datetime: }{}'.format(parsed_date))
+          return
+
+        pub_date = parsed_date.timestamp()
 
         extractedData = {
             'publisherName': self.format_publisher_name(self.extractor.extract(doc, dom.publisher_selectors, 'publisher', 'name')),

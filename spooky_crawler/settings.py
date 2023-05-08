@@ -13,6 +13,7 @@ BOT_NAME = 'spooky_crawler'
 
 SPIDER_MODULES = ['spooky_crawler.spiders']
 NEWSPIDER_MODULE = 'spooky_crawler.spiders'
+REQUEST_FINGERPRINTER_IMPLEMENTATION= '2.7'
 
 # JOBDIR = 'crawls/spooky-1'
 
