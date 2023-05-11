@@ -87,7 +87,14 @@ ufo_weighting = Weighting({
     **_common_weights},
     ArticleClass.UFO.value)
 
-abc_weighting = Weighting({
+cryptid_weighting = Weighting({
+    'nessie': 1,
+    'loch ness monster': 1,
+    'owl man': 1,
+    'owl-man': 1,
+    'owlman': 1,
+    'moth-man': 1,
+    'mothman': 1,
     'big-foot': 1,
     'big foot': 1,
     'bigfoot': 1,
@@ -99,11 +106,13 @@ abc_weighting = Weighting({
     'mystery creature': 1,
     'mystery beast': 1,
     'fairy folk': 1,
+    'beast of bodmin':0.5,
     'fairy': 0.5,
     'puma': 0.5,
     'panther': 0.5,
     'lion': 0.5,
     'gnome': 0.2,
     'sighting': 0.2,
+    'day out': -1,
     **_common_weights},
-    ArticleClass.ABC.value)
+    ArticleClass.CRYPTID.value)

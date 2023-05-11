@@ -22,7 +22,7 @@ class ArticleParser():
         self.logger = logger
         self.classifier = ArticleClassifier(
             [weightings.ghost_weighting, weightings.ufo_weighting,
-                weightings.abc_weighting],
+                weightings.cryptid_weighting],
             logger)
         pass
 
