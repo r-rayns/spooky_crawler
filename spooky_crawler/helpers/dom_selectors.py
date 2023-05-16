@@ -24,5 +24,7 @@ article_body_selectors = (
     lambda doc: ' '.join(
         doc.xpath('//div[@class="article-body"]//p').getall()),
     lambda doc: ' '.join(
-        doc.xpath('//div[@id="content-wrapper"]//p[not(a)]').getall())
+        doc.xpath('//div[@id="content-wrapper"]//p[not(a)]').getall()),
+    lambda doc: ' '.join(
+        doc.xpath('//div[@class="pagestory"]//p').getall()),
 )

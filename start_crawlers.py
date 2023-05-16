@@ -29,16 +29,6 @@ def create_logger(name, log_path, log_name):
     logger.addHandler(file_handler)
     return logger
 
-
-# For testing purposes
-# class Rrayn(SpookySpider):
-#     name = "rrayn"
-#     job_dir = 'crawls/rrayn'
-#     custom_settings = {'JOBDIR': job_dir}
-#     sitemap_urls = ['https://www.rrayns.co.uk/robots.txt']
-#     logger = create_logger('spider.rrayn', job_dir, 'rrayn.log')
-
-
 class SpookyLiverpool(SpookySpider):
     name = "spooky_liverpool"
     job_dir = 'crawls/liverpool'
@@ -84,6 +74,21 @@ class SpookyHampshire(SpookySpider):
     sitemap_urls = ['https://www.hampshirelive.news/robots.txt']
     logger = create_logger('spider.hampshire', job_dir, 'hampshire.log')
 
+class SpookyNorfolk(SpookySpider):
+    name = "spooky_norfolk"
+    job_dir = 'crawls/norfolk'
+    custom_settings = {'JOBDIR': job_dir}
+    sitemap_urls = ['https://www.norfolklive.co.uk/robots.txt']
+    logger = create_logger('spider.norfolk', job_dir, 'norfolk.log')
+
+class SpookyInverness(SpookySpider):
+    name = "spooky_inverness"
+    job_dir = 'crawls/inverness'
+    custom_settings = {'JOBDIR': job_dir}
+    sitemap_urls = ['https://www.inverness-courier.co.uk/_sitemaps/sitemap.xml']
+    sitemap_follow = ['/_sitemaps/']
+    logger = create_logger('spider.inverness', job_dir, 'inverness.log')
+
 process = CrawlerProcess(get_project_settings())
 
 
@@ -109,10 +114,6 @@ def _crawl(result, spider, parser, logger, date_threshold=None):
         logger.info('⚠ Error starting crawl!')
     return deferred
 
-
-# _crawl(None, Rrayn, ArticleParser(
-#     'Rrayn', Rrayn.logger).parse_article, Rrayn.logger)
-
 _crawl(None, SpookyLiverpool, ArticleParser(
     'Liverpool Echo', SpookyLiverpool.logger).parse_article, SpookyLiverpool.logger)
 _crawl(None, SpookyManchester, ArticleParser(
@@ -125,4 +126,8 @@ _crawl(None, SpookyLincolnshire, ArticleParser(
     'Lincolnshire Live', SpookyLincolnshire.logger).parse_article, SpookyLincolnshire.logger)
 _crawl(None, SpookyHampshire, ArticleParser(
     'Hampshire Live', SpookyHampshire.logger).parse_article, SpookyHampshire.logger)
+_crawl(None, SpookyNorfolk, ArticleParser(
+    'Norfolk Live', SpookyNorfolk.logger).parse_article, SpookyNorfolk.logger)
+_crawl(None, SpookyInverness, ArticleParser(
+    'Inverness Courier', SpookyInverness.logger).parse_article, SpookyInverness.logger)
 process.start()
