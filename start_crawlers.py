@@ -1,5 +1,3 @@
-import scrapy
-import os
 from datetime import datetime, timedelta
 import pytz
 from spooky_crawler.spiders.spooky_spider import SpookySpider
@@ -13,6 +11,10 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from twisted.internet.interfaces import IReactorTime
+from dotenv import load_dotenv
+
+# load the .env file
+load_dotenv()
 
 def create_logger(name, log_path, log_name):
     Path(log_path).mkdir(parents=True, exist_ok=True)
