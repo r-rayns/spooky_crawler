@@ -1,3 +1,4 @@
+import json
 import os
 import dateparser
 import spooky_crawler.helpers.dom_selectors as dom
@@ -76,9 +77,11 @@ class ArticleParser():
 
     def store_article(self, article):
         headers = {
-            'Authorization': 'Bearer {}'.format(os.getenv('API_TOKEN'))}
+            'Authorization': 'Bearer {}'.format(os.getenv('API_TOKEN')),
+            'Content-Type': 'application/json'
+        }
         req = requests.post(
-            '{}/api/articles'.format(os.getenv('HOST')), data=article, headers=headers)
+            '{}/api/articles'.format(os.getenv('HOST')), data=json.dumps(article), headers=headers)
 
         if(req.status_code == 200):
             self.logger.info('Stored article!')
