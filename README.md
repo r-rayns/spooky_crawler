@@ -1,6 +1,6 @@
 # spooky_crawler
 
-## Install
+## Install 📦
 
 1. Install the Python package manager pip.
     
@@ -39,6 +39,8 @@
   pip install -r requirements.txt
 ```
 
-## .env
+## .env 📔
+
 HOST - host to run under e.g. http://localhost:8080
+
 API_TOKEN - token to access the spooky_kingdom API
